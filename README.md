@@ -5,9 +5,19 @@
 q-mode is a major mode for editing q (the language written by [Kx Systems](http://www.kx.com)) in [Emacs](https://www.gnu.org/software/emacs/).
 
 Some of its major features include:
-- syntax highlighting (font lock),
-- interaction with inferior q[con] instance,
-- scans declarations and places them in a menu.
+- interaction with inferior q instance using
+
+There is another q-mode on GitHub that is more fully-featured
+[psaris/q-mode]. I think I may have branched from that a long time ago
+and changed the implementation substantially.
+
+I only describe the minimal set of features I've used since then. I
+lot of the original features are present but unimplemented.
+
+- syntax highlighting
+- q documentation on info
+- remote operation with gnuclient 
+  
 
 ## Installation
 
@@ -39,51 +49,112 @@ initialization file.
 
 ## Usage
 
-Use `M-x q` to start an inferior q shell. Or use `M-x qcon` to
-create an inferior qcon shell to communicate with an existing q
-process.  Both can be prefixed with the universal-argument `C-u` to
-customize the arguments used to start the processes.
+Q mode defined in `q-mode.el':
+Major mode for editing Q scripts.
 
-The first q[con] session opened becomes the activated buffer.
-To open a new session and send code to the new buffer, it must be
-actived.  Switch to the desired buffer and type `C-c M-RET` to
-activate it.
+Provides the `q-run-script' (C-c C-l) command to run the interpreter
+on the script in the current buffer. It will be verified that the buffer has a
+file associated with it, and you will be prompted to save edited buffers when
+invoking this command. Special commands to quickly locate the main script and
+the input line of the Q eval buffer, and to visit the source lines shown in
+compiler/debugger messages are provided as well (see `q-eval-mode').
 
-The following commands are available to interact with an inferior
-q[con] process/buffer. `C-c C-l` sends a single line, `C-c C-f`
-sends the surrounding function, `C-c C-r` sends the selected region
-and `C-c C-b` sends the whole buffer.  If the source file exists on
-the same machine as the q process, `C-c M-l` can be used to load
-the file associated with the active buffer.
+These operations can be selected from the Q mode menu (accessible from
+the menu bar), which also provides commands for reading the online
+help and customizing the Q/Q-Eval mode setup.
 
+Command list:
+
+key             binding
+---             -------
+
+C-c		Prefix Command
+TAB		q-indent-line
+ESC		Prefix Command
+( .. )		q-electric-delim
+;		q-electric-delim
+=		q-electric-delim
+[		q-electric-delim
+]		q-electric-delim
+|		q-electric-delim
+
+C-M-i		q-move-to-indent-column
+C-M-q		q-indent-current-rule
+
+C-c C-a		q-first-msg
+C-c C-b		q-do-buf
+C-c C-c		q-do-cmd
+C-c C-f		q-find-script
+C-c C-h		q-help
+C-c C-l		q-run-script
+C-c RET		q-run-main
+C-c C-n		q-next-msg
+C-c C-p		q-prev-msg
+C-c C-u		q-current-msg
+C-c C-v		q-goto-input-line
+C-c C-x		q-quit-eval
+C-c C-z		q-last-msg
+
+
+Entry to this mode calls the value of q-mode-hook if that value is
+non-nil.
+
+## Typical use
+
+I noted above, I don't really use that many of these features.
+
+Typically, I would load a .q script into Emacs. Put in a comment
+break somewhere in it, that's a forward slash, like this.
+
+/ 
+
+Run the script with `C-c C-l` - say "yes" to the prompt to revert the buffer. It
+will execute code up to the comment. Go back to the edit buffer, find
+the code after the comment and then step through it with `C-c C-c`.
+  
 ## Customization
 
 `M-x customize-group` can be used to customize the `q` group.
-Specifically, the `inferior-q-program-name` and
-`inferior-qcon-program-name` variables can be changed depending on
-your environment.
 
-Q-mode indents each level based on `q-indent-step`.  To indent code
-based on {}-, ()-, and []-groups instead of equal width tabs, you
-can set this value to nil.
+Key to these are the q-prog-name, q-prog-opts and q-prog-args.
 
-The variables `q-msg-prefix` and `q-msg-postfix` can be customized
-to prefix and postfix every msg sent to the inferior q[con]
-process. This can be used to change directories before evaluating
-definitions within the q process and then changing back to the root
-directory. To make the variables change values depending on which
-file they are sent from, values can be defined in a single line a
-the top of each .q file:
+There are a great many other options, that are not in use in this
+implementation of q-mode.
 
-```q
-/ -*- q-msg-prefix: "system \"d .jnp\";"; q-msg-postfix: ";system \"d .\"";-*-
-```
+The font-lock-mode with syntax highlighting doesn't work
+anymore. There is a `kdbp-mode' that does that.
 
-or at the end:
+The q-gnuclient and q-info methods don't work.
+
+## Controlling Execution
+
+You can also use the local varialbes block to specify how to run the Q interpreter.
 
 ```q
-/ Local Variables:
-/ q-msg-prefix: "system \"d .jnp\";"
-/ q-msg-postfix: ";system \"d .\""
-/ End:
+/  Local Variables: 
+/  mode:q
+/  q-prog-args: "last d -p 5016 -t 1000"
+/  fill-column: 75
+/  comment-column:50
+/  comment-start: "/  "
+/  comment-end: ""
+/  End:
 ```
+
+## About functions
+
+Although this mode is useful, the step mode `C-c C-c` doesn't support multi-line
+function definitions. The q interpreter doesn't have a "paste" mode like Python or
+Scala, so if evaluates each line, even when defining a function.
+
+### So
+
+Either make the function a single line,
+  
+Or put any multi-line function into a separate script and source them with \l.
+
+It is mentioned in the other q-mode by psaris that there is support for that.
+
+# Postamble
+
+I do still use this mode, so I may be able to fix it up if you need a feature.
