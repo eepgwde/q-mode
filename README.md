@@ -158,3 +158,36 @@ It is mentioned in the other q-mode by psaris that there is support for that.
 # Postamble
 
 I do still use this mode, so I may be able to fix it up if you need a feature.
+
+## History
+
+I mentioned above that there is another q-mode by psaris.
+
+https://github.com/psaris/q-mode
+
+I haven't used this directly. There is another q-mode by little-arhat
+
+https://github.com/little-arhat/q-mode
+
+And I've followed arhat's work, but added some features from psaris. 
+
+arhat used a basic q-minor-mode to interact with the q interpreter and
+put the syntax highlighting into kdbp-mode.
+
+I promoted arhat's q-minor-mode to be a major-mode, so there is no
+syntax-highlighting.
+
+I used some of psaris' q interpreter interaction in this q-mode.
+
+If you want syntax highlighting, you can still use the kdbp-mode, but
+the syntax is out-of-date now.
+
+I've now separated the kdbp-mode I use with this q-mode so that this
+q-mode will work on its own.
+
+So the kdbp-mode I use is this one.
+
+https://github.com/eepgwde/kdbp-mode
+
+The notes I made there say that I took it from Alvin Shih, but it
+looks very similar to arhat.
